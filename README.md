@@ -4,7 +4,7 @@
 
 You can create, view, update, and delete your tasks, which are stored persistently in a JSON file.
 
-This project was created to **enhance my TDD (Test-Driven Development) skills**, following a strict write-tests-first approach.
+I created this project to **improve my self in TDD (Test-Driven Development)**, following a strict write-tests-first approach.
 
 ---
 
