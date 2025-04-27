@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: "21"
-          distribution: "adoptium" # Corrected distribution
+          distribution: "jetbrains" # Corrected distribution
 
       # Cache Maven dependencies
       - name: Cache Maven dependencies
