@@ -1,7 +1,7 @@
 package org.mhk.enums;
 
 public enum State {
-    INCOMPLETE("Incomplete", "Task is not started."),
+    NEW("New", "Task is just created."),
     INPROGRESS("In progress", "Task is in progress."),
     COMPLETE("Complete", "Task is complete."),
     WONTDO("Won't do", "Task will not be done.");

@@ -19,7 +19,12 @@ public class TaskManager {
     public void appendATaskToTheTaskList(Task task){
         taskList.addLast(task);
     }
-
+    public void removeTask(Task task){
+        taskList.removeIf(t -> t.equals(task));
+    }
+    public void removeTaskAt(int index){
+        taskList.remove(index);
+    }
     public void flushTaskList(){
         taskList.clear();
     }

@@ -64,12 +64,12 @@ class TaskTest {
     }
 
     /**
-     * Initial state of a task should be INCOMPLETE
+     * Initial state of a task should be NEW
      */
     @ParameterizedTest
     @MethodSource("provideTasks")
-    void taskInitialStateShouldBeIncomplete(Task task) {
-        assertEquals(State.INCOMPLETE, task.getState());
+    void taskInitialStateShouldBeNew(Task task) {
+        assertEquals(State.NEW, task.getState());
     }
 
     /**

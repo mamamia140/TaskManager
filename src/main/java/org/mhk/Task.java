@@ -18,7 +18,7 @@ public class Task {
         this.id = generateID();
         this.title = title;
         this.description = description;
-        this.state = State.INCOMPLETE;
+        this.state = State.NEW;
     }
 
     public String getTitle() {
