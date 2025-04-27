@@ -36,3 +36,51 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Ignore the build directory
+/target/
+/bin/
+/out/
+
+# Ignore JAR files
+*.jar
+
+# Ignore compiled Java files
+*.class
+
+# Ignore IDE-specific files
+# IntelliJ IDEA
+.idea/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/
+
+# Ignore NSIS generated files
+*.exe
+
+# Ignore the installer script's temporary output (e.g., setup exe)
+installer_script.exe
+
+# Ignore any backup or temporary files
+*~
+*.swp
+
+# Ignore logs
+*.log
+
+# Ignore system-specific files (macOS, Windows, Linux)
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Ignore the installer files in 'installer' directory
+installer/*
+
+# Ignore data directories if they contain user-specific data
+# Adjust if needed, for example, don't ignore the entire "data" folder if needed
+# /data/*

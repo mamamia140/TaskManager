@@ -2,11 +2,11 @@ package org.mhk;
 
 import org.mhk.enums.State;
 
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Scanner;
 
 public class Main {
-    static final String FILE_NAME = "C:\\Program Files\\TaskManager\\data\\tasks.json";
+    static final String FILE_NAME = Paths.get(System.getProperty("user.home"), "TaskManager", "data", "tasks.json").toString();
     static TaskManager taskManager;
 
     public static void main(String[] args) {
@@ -50,7 +50,7 @@ public class Main {
         System.out.println("Tasks:\n");
         for (int i = 0; i < taskManager.getTaskList().size(); i++) {
             Task task = taskManager.getTaskList().get(i);
-            System.out.printf("%d.\n%s\n", i++, task.toString());
+            System.out.printf("%d.\n%s\n", i+1, task.toString());
         }
     }
 
