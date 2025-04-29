@@ -28,6 +28,10 @@ java -version
 - **Maven**  
   (Used for building and packaging the project.)
   
-You should run "mvn clean package" to build the project
+You should run 
+```bash
+mvn clean package
+```
+ to build the project
   
 
