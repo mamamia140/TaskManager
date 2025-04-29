@@ -18,7 +18,7 @@ You can download the latest version of TaskManager from the [**GitHub Releases**
 You can verify your Java version by running:
 ```bash
 java -version
-
+```
 
 ## ⚙️ How to Build from Source
 
