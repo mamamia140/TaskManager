@@ -37,7 +37,7 @@ public class Main {
         String title = args[1];
         String description = args[2];
         Task newTask = new Task(title, description);
-        taskManager.appendATaskToTheTaskList(newTask);
+        taskManager.addTask(newTask);
         FileManager.saveTasks(taskManager, FILE_NAME);
         System.out.println("Task added successfully!");
     }
@@ -56,47 +56,49 @@ public class Main {
 
     private static void handleRemove(String[] args) {
         if (args.length < 2 || args[1].equalsIgnoreCase("--help") || args[1].equals("?")) {
-            System.out.println("Usage: remove <index_or_id_or_unique_title>");
+            System.out.println("Usage: remove <index_or_id_or_unique_title | all>");
             System.out.println("- <index>: 1-based task number (use 'list' to view)");
             System.out.println("- <id>: task's unique identifier");
             System.out.println("- <title>: task's title (must be unique)");
+            System.out.println("- all: deletes all tasks");
             return;
         }
 
         String identifier = args[1];
-        Task taskToRemove = null;
 
-        // Try if identifier is a number (index)
         try {
-            int index = Integer.parseInt(identifier) - 1; // 1-based to 0-based
-            if (index >= 0 && index < taskManager.getTaskList().size()) {
-                taskToRemove = taskManager.getTaskLocatedAt(index);
-            } else {
-                System.out.println("Invalid task index.");
+            if (identifier.equalsIgnoreCase("all")) {
+                taskManager.flushTaskList();
+                FileManager.saveTasks(taskManager, FILE_NAME);
+                System.out.println("All tasks removed successfully!");
                 return;
             }
-        } catch (NumberFormatException e) {
-            // Not an index, continue to search by id or title
-            List<Task> matchingTasks = taskManager.getTaskList().stream()
-                    .filter(t -> t.getId().equals(identifier) || t.getTitle().equalsIgnoreCase(identifier))
-                    .toList();
 
-            if (matchingTasks.isEmpty()) {
-                System.out.println("No task found with the given ID or Title: " + identifier);
-                return;
-            } else if (matchingTasks.size() > 1) {
-                System.out.println("Multiple tasks found with that title. Please use ID instead.");
-                return;
-            } else {
-                taskToRemove = matchingTasks.get(0);
+            // Try if identifier is a number (index)
+            try {
+                int index = Integer.parseInt(identifier) - 1; // Convert to 0-based index
+                taskManager.removeTaskByIndex(index);
+            } catch (NumberFormatException e) {
+                // Not an index; try removing by ID or Title
+                try {
+                    taskManager.removeTaskById(identifier);
+                } catch (IllegalArgumentException idEx) {
+                    try {
+                        taskManager.removeTaskByTitle(identifier);
+                    } catch (IllegalArgumentException titleEx) {
+                        System.out.println("No task found with given ID or Title: " + identifier);
+                        return;
+                    }
+                }
             }
+
+            FileManager.saveTasks(taskManager, FILE_NAME);
+            System.out.println("Task removed successfully!");
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Invalid index. Please make sure the number corresponds to a task.");
         }
-
-        // Remove and save
-        taskManager.removeTask(taskToRemove);
-        FileManager.saveTasks(taskManager, FILE_NAME);
-        System.out.println("Task removed successfully!");
     }
+
 
 
 
@@ -137,55 +139,77 @@ public class Main {
             switch (property) {
                 case "title" -> System.out.println("Provide the new title you want to set for the task.");
                 case "description" -> System.out.println("Provide the new description for the task.");
-                case "state" -> System.out.println("Provide the new state. Available states are:");
-                case "new", "in_progress", "complete" -> {} // valid states
+                case "state" -> {
+                    System.out.println("Provide the new state. Available states are:");
+                    for (State s : State.values()) {
+                        System.out.println("- " + s.name());
+                    }
+                }
                 default -> {
                     System.out.println("Unknown property. Available properties are: title, description, state");
                     return;
                 }
             }
-
-            if (property.equals("state")) {
-                for (State s : State.values()) {
-                    System.out.println("- " + s.name());
-                }
-            }
             return;
         }
 
-        // Find task by ID or Title
-        Task task = taskManager.getTaskList().stream()
-                .filter(t -> t.getId().equals(idOrTitle) || t.getTitle().equalsIgnoreCase(idOrTitle))
-                .findFirst()
-                .orElse(null);
+        // Determine if the identifier is ID or Title
+        boolean isId = taskManager.getTaskList().stream()
+                .anyMatch(t -> t.getId().equals(idOrTitle));
+        boolean isTitle = !isId && taskManager.getTaskList().stream()
+                .anyMatch(t -> t.getTitle().equalsIgnoreCase(idOrTitle));
 
-        if (task == null) {
+        if (!isId && !isTitle) {
             System.out.println("Task not found with ID or Title: " + idOrTitle);
             return;
         }
 
-        switch (property) {
-            case "title" -> task.setTitle(newValue);
-            case "description" -> task.setDescription(newValue);
-            case "state" -> {
-                try {
-                    task.setState(State.valueOf(newValue.toUpperCase()));
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Invalid state. Available states are:");
-                    for (State s : State.values()) {
-                        System.out.println("- " + s.name());
+        try {
+            switch (property) {
+                case "title" -> {
+                    if (isId) {
+                        taskManager.updateTaskTitleById(idOrTitle, newValue);
+                    } else {
+                        taskManager.updateTaskTitleByTitle(idOrTitle, newValue);
                     }
+                }
+                case "description" -> {
+                    if (isId) {
+                        taskManager.updateTaskDescriptionById(idOrTitle, newValue);
+                    } else {
+                        taskManager.updateTaskDescriptionByTitle(idOrTitle, newValue);
+                    }
+                }
+                case "state" -> {
+                    State newState;
+                    try {
+                        newState = State.valueOf(newValue.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid state. Available states are:");
+                        for (State s : State.values()) {
+                            System.out.println("- " + s.name());
+                        }
+                        return;
+                    }
+                    if (isId) {
+                        taskManager.updateTaskStateById(idOrTitle, newState);
+                    } else {
+                        taskManager.updateTaskStateByTitle(idOrTitle, newState);
+                    }
+                }
+                default -> {
+                    System.out.println("Unknown property: " + property);
                     return;
                 }
             }
-            default -> {
-                System.out.println("Unknown property: " + property);
-                return;
-            }
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            return;
         }
 
         FileManager.saveTasks(taskManager, FILE_NAME);
         System.out.println("Task updated successfully!");
     }
+
 
 }

@@ -3,7 +3,7 @@ package org.mhk;
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import org.mhk.enums.State;
 
-public class Task {
+public class Task implements Cloneable{
 
     private final String id;
     private String title;
@@ -19,6 +19,12 @@ public class Task {
         this.title = title;
         this.description = description;
         this.state = State.NEW;
+    }
+    private Task(Task task) {
+        this.id = task.getId();
+        this.title = task.getTitle();
+        this.description = task.getDescription();
+        this.state = task.getState();
     }
 
     public String getTitle() {
@@ -48,6 +54,14 @@ public class Task {
         this.state = state;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String generateID(){
+        return NanoIdUtils.randomNanoId();
+    }
+
     @Override
     public String toString(){
         return """
@@ -58,11 +72,9 @@ public class Task {
                 """.formatted(this.getId(), this.getTitle(), this.getDescription(), this.getState().getName());
     }
 
-    public String getId() {
-        return id;
+    @Override
+    public Task clone() {
+        return new Task(this); // uses copy constructor
     }
 
-    public String generateID(){
-        return NanoIdUtils.randomNanoId();
-    }
 }

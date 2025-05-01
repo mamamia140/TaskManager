@@ -1,4 +1,4 @@
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -9,15 +9,14 @@ import org.mhk.enums.State;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TaskManagerTest {
 
     static TaskManager taskManager;
 
-    @BeforeAll
-    static void setUp()
+    @BeforeEach
+    void setUp()
     {
         taskManager = new TaskManager(List.of(
                 new Task("Buy milk", "You need to buy milk"),
@@ -32,10 +31,10 @@ class TaskManagerTest {
     @ParameterizedTest
     @ValueSource(strings = {"Title a", "Title b", "Title c"})
     void shouldUpdateTaskTitle(String newTitle) {
-        Task firstTask = taskManager.getTaskLocatedAt(0);
+        Task firstTask = taskManager.getTaskByIndex(0);
         String originalId = firstTask.getId();
-        firstTask.setTitle(newTitle);
-        assertEquals(newTitle, firstTask.getTitle());
+        taskManager.updateTaskTitleByIndex(0, newTitle);
+        assertEquals(newTitle, taskManager.getTaskByIndex(0).getTitle());
         assertIdUnchanged(firstTask, originalId);
     }
     /**
@@ -43,9 +42,8 @@ class TaskManagerTest {
      */
     @Test
     void shouldNotAllowEmptyTitleUpdate(){
-        Task task = taskManager.getTaskLocatedAt(0);
-        assertThrows(IllegalArgumentException.class, () -> task.setTitle(""));
-        assertThrows(IllegalArgumentException.class, () -> task.setTitle(null));
+        assertThrows(IllegalArgumentException.class, () -> taskManager.updateTaskTitleByIndex(0, ""));
+        assertThrows(IllegalArgumentException.class, () -> taskManager.updateTaskTitleByIndex(0, null));
     }
 
     /**
@@ -54,10 +52,10 @@ class TaskManagerTest {
     @ParameterizedTest
     @ValueSource(strings = {"desc a", "desc b", ""})
     void shouldUpdateTaskDescription(String desc) {
-        Task firstTask = taskManager.getTaskLocatedAt(0);
+        Task firstTask = taskManager.getTaskByIndex(0);
         String originalId = firstTask.getId();
-        firstTask.setDescription(desc);
-        assertEquals(desc, firstTask.getDescription());
+        taskManager.updateTaskDescriptionByIndex(0, desc);
+        assertEquals(desc, taskManager.getTaskByIndex(0).getDescription());
         assertIdUnchanged(firstTask, originalId);
     }
 
@@ -67,10 +65,10 @@ class TaskManagerTest {
     @ParameterizedTest
     @MethodSource("listOfStates")
     void shouldUpdateTaskState(State state) {
-        Task firstTask = taskManager.getTaskLocatedAt(0);
+        Task firstTask = taskManager.getTaskByIndex(0);
         String originalId = firstTask.getId();
-        firstTask.setState(state);
-        assertEquals(state, firstTask.getState());
+        taskManager.updateTaskStateByIndex(0, state);
+        assertEquals(state, taskManager.getTaskByIndex(0).getState());
         assertIdUnchanged(firstTask, originalId);
     }
 
@@ -79,6 +77,15 @@ class TaskManagerTest {
      */
     private void assertIdUnchanged(Task task, String originalId) {
         assertEquals(originalId, task.getId(), "Task ID should not change after modifications.");
+    }
+
+    /**
+     * task manager should be able to batch delete
+     */
+    @Test
+    void shouldRemoveAllTasks(){
+        taskManager.flushTaskList();
+        assertTrue(taskManager.getTaskList().isEmpty());
     }
 
 
